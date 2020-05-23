@@ -9,21 +9,83 @@ from scipy import constants
 from dataclasses import dataclass
 from tqdm import tqdm
 
+from metric import pymetric
+
 class FemtoGen:
+
     def __init__(self, *args, **kawgs):
         self.config = 'config'
         self.kinematics = 0
-        self.cross_section = 0
         self.GAMMA = 0
         self.tau = 0
         self.data_file = ''
-        self.proton_mass = 0.93827208816
+        self.proton_mass = 0.93828
 
         self.Ge = 0
         self.Gm = 0
         self.F2 = 0
         self.F1 = 0
 
+        self.Q = 0
+        self.nu = 0
+        self.gamma = 0
+        self.tau = 0
+        self.y = 0
+        self.q_0 = 0
+        self.kp_0 = 0
+        self.eps = 0
+        self.xi = 0
+
+        # Trig functions
+        self.cosl = 0
+        self.sinl = 0
+        self.coslp = 0
+        self.sinlp = 0
+        self.cost = 0
+        self.sint = 0
+
+        # Four-vectors
+        self.q = 0
+        self.qp = 0
+        self.p = 0
+        self.delta = 0
+        self.pp = 0
+        self.P = 0
+        self.k = 0
+        self.kp = 0
+
+        # Contractions
+        self.kk = 0
+        self.PP = 0
+        self.k_qp = 0
+
+        self.kP = 0
+        self.k_kp = 0
+        self.kp_P = 0
+        self.kp_qp = 0
+
+        self.P_qp = 0
+        self.kd = 0
+        self.kp_d = 0
+        self.qpd = 0
+
+        self.kk_t = 0
+        self.kqp_t = 0
+        self.kkp_t = 0
+        self.kpqp_t = 0
+        self.kP_t = 0
+        self.kpP_t = 0
+        self.qpP_t = 0
+        self.kd_t = 0
+        self.kpd_t = 0
+        self.qpd_t = 0
+
+        self.s = 0
+
+        self.GAMMA = 0
+
+        self.D_plus = 0
+        self.D_minus = 0
 
         self.xbj = []
         self.t = []
@@ -39,12 +101,19 @@ class FemtoGen:
         self.ImEt = []
         
         self.ke = 8.985551e9  # N m^2 C-2 Coulomb's constant
-        self.metric = self.minkowski_metric(np.identity(4))
-        
+        self.metric = pymetric.Metric()
+        self.metric.set_minkowski_metric()
+
+        self.cross_section = {'bh': 0,
+                              'dvcs': 0,
+                              'int': 0,
+                              'full': 0}
+
         if "config" in kawgs:
             self.config = kawgs['config']
         else:
             pass
+
     def update_elastic_form_factors(self, t: float)->'float, float, float, float':
         self.Ge = 1/math.pow(1 + t/0.710649, 2)
         self.Gm = 2.792847337*self.Ge
@@ -52,14 +121,6 @@ class FemtoGen:
         self.F1 = self.Gm - self.F2
 
         return self.F1, self.F2, self.Ge, self.Gm
-
-
-    def minkowski_metric(self, metric: 'numpy array')->'numpy array':
-        """
-           Returns the 4x4 mikowski metric with diagonal of {-1, 1, 1, 1}
-        """
-        return(np.multiply(metric, np.array([1, -1, -1, -1])))
-
     
     def read_config(self, config: str):
         """
@@ -78,102 +139,144 @@ class FemtoGen:
             print("Failed to find configuration file. Exiting.")
             exit(1)
 
-    def calculate_kinematics(self, i: int, phi: float)->'float, float, float':
-        Q = math.sqrt(self.Q2[i])
-        nu = self.Q2[i]/(2*self.proton_mass*self.xbj[i])
-        gamma = Q/nu
+    def calculate_kinematics(self, i: int, phi: float):
+
+        self.Q = math.sqrt(self.Q2[i])
+        self.nu = self.Q2[i]/(2*self.proton_mass*self.xbj[i])
+        self.gamma = self.Q/self.nu
         self.tau = -self.t[i]/(4*math.pow(self.proton_mass, 2))
-        y = Q/(gamma*self.k_0[i])
-        q_0 = (Q/gamma)*(1 + self.xbj[i]*self.t[i]/self.Q2[i])
-        kp_0 =  self.k_0[i]*(1 - y)
-        eps = (1 - y - math.pow(0.5*y*gamma, 2))/(1 - y + 0.5*math.pow(gamma, 2) + math.pow(0.5*y*gamma, 2))
-        xi = self.xbj[i]*((1 + (self.t[i]/(2*self.Q2[i])))/(2 - self.xbj[i] + ((self.xbj[i]*self.t[i])/self.Q2[i])))
+        self.y = self.Q/(self.gamma*self.k_0[i])
+        self.q_0 = (self.Q/self.gamma)*(1 + self.xbj[i]*self.t[i]/self.Q2[i])
+        self.kp_0 =  self.k_0[i]*(1 - self.y)
+        self.eps = (1 - self.y - math.pow(0.5*self.y*self.gamma, 2))/(1 - self.y + 0.5*math.pow(self.gamma, 2) + math.pow(0.5*self.y*self.gamma, 2))
+        self.xi = self.xbj[i]*((1 + (self.t[i]/(2*self.Q2[i])))/(2 - self.xbj[i] + ((self.xbj[i]*self.t[i])/self.Q2[i])))
 
         # Trig functions
-        cosl = -(1/math.sqrt(1 + math.pow(gamma, 2)))*(1 + 0.5*y*math.pow(gamma, 2))
-        sinl = (gamma/math.sqrt(1 + math.pow(gamma, 2)))*math.sqrt(1 - y - math.pow(0.5*gamma*y, 2))
-        coslp = (cosl + y*math.sqrt(1 + math.pow(gamma, 2)))/(1 - y)
-        sinlp = sinl/(1 - y)
-        cost = -(1/math.sqrt(1 + math.pow(gamma, 2)))*(1 + (.5*math.pow(gamma,2))*((1+(self.t[i]/self.Q2[i]))/(1 + ((self.xbj[i]*self.t[i])/(self.Q2[i])))))
-        sint = math.sqrt(1-math.pow(cost, 2))
+        self.cosl = -(1/math.sqrt(1 + math.pow(self.gamma, 2)))*(1 + 0.5*self.y*math.pow(self.gamma, 2))
+        self.sinl = (self.gamma/math.sqrt(1 + math.pow(self.gamma, 2)))*math.sqrt(1 - self.y - math.pow(0.5*self.gamma*self.y, 2))
+        self.coslp = (self.cosl + self.y*math.sqrt(1 + math.pow(self.gamma, 2)))/(1 - self.y)
+        self.sinlp = self.sinl/(1 - self.y)
+        self.cost = -(1/math.sqrt(1 + math.pow(self.gamma, 2)))*(1 + (.5*math.pow(self.gamma,2))*((1+(self.t[i]/self.Q2[i]))/(1 + ((self.xbj[i]*self.t[i])/(self.Q2[i])))))
+        self.sint = math.sqrt(1-math.pow(self.cost, 2))
 
         # Four-vectors
-        q = np.array([nu, 0, 0, -nu * math.sqrt(1 + math.pow(gamma, 2))])
-        qp = q_0 * np.array([1, sint * math.cos(phi), sint * math.sin(phi), cost])
-        p = np.array([self.proton_mass, 0, 0, 0])
-        delta = q - qp
-        pp = p + delta
-        P = 0.5*(p + pp)
-        k = self.k_0[i]*np.array([1, sinl, 0, cosl])
-        kp = kp_0*np.array([1, sinlp, 0, coslp])
+        self.q = np.array([self.nu, 0, 0, -self.nu*math.sqrt(1 + math.pow(self.gamma, 2))])
+        self.qp = self.q_0*np.array([1, self.sint*math.cos(phi), self.sint*math.sin(phi), self.cost])
+        self.p = np.array([self.proton_mass, 0, 0, 0])
+        self.delta = self.q - self.qp
+        self.pp = self.p + self.delta
+        self.P = 0.5*(self.p + self.pp)
+        self.k = self.k_0[i]*np.array([1, self.sinl, 0, self.cosl])
+        self.kp = self.kp_0*np.array([1, self.sinlp, 0, self.coslp])
 
 
         # Contractions
-        kk = self.contract(k, k)
-        PP = self.contract(p, p)
-        k_qp = self.contract(k, qp)
+        self.kk = self.metric.contract(self.k, self.k)
+        self.PP = self.metric.contract(self.p, self.p)
+        self.k_qp = self.metric.contract(self.k, self.qp)
 
-        kP = self.contract(k,P)
-        k_kp = self.contract(k,kp)
-        kp_P = self.contract(kp,P)
-        kp_qp = self.contract(kp,qp)
+        self.kP = self.metric.contract(self.k,self.P)
+        self.k_kp = self.metric.contract(self.k,self.kp)
+        self.kp_P = self.metric.contract(self.kp,self.P)
+        self.kp_qp = self.metric.contract(self.kp,self.qp)
 
-        P_qp = self.contract(P,qp)
-        kd  = self.contract(k, delta)
-        kp_d = self.contract(kp, delta)
-        qpd = self.contract(qp, delta)
+        self.P_qp = self.metric.contract(self.P,self.qp)
+        self.kd  = self.metric.contract(self.k, self.delta)
+        self.kp_d = self.metric.contract(self.kp, self.delta)
+        self.qpd = self.metric.contract(self.qp, self.delta)
 
-        kk_t = self.contract(k, k, type='transverse')
-        kqp_t = self.contract(k, qp, type='transverse')
-        kkp_t = self.contract(k, kp, type='transverse')
-        kpqp_t = self.contract(kp, qp, type='transverse')
-        kP_t = self.contract(k, P, type='transverse')
-        kpP_t = self.contract(kp, P, type='transverse')
-        qpP_t =  self.contract(qp, P, type='transverse')
-        kd_t =  self.contract(k, delta, type='transverse')
-        kpd_t = self.contract(kp, delta, type='transverse')
-        qpd_t = self.contract(qp, delta, type='transverse')
+        self.kk_t = self.metric.contract(self.k, self.k, type='transverse')
+        self.kqp_t = self.metric.contract(self.k, self.qp, type='transverse')
+        self.kkp_t = self.metric.contract(self.k, self.kp, type='transverse')
+        self.kpqp_t = self.metric.contract(self.kp, self.qp, type='transverse')
+        self.kP_t = self.metric.contract(self.k, self.P, type='transverse')
+        self.kpP_t = self.metric.contract(self.kp, self.P, type='transverse')
+        self.qpP_t =  self.metric.contract(self.qp, self.P, type='transverse')
+        self.kd_t =  self.metric.contract(self.k, self.delta, type='transverse')
+        self.kpd_t = self.metric.contract(self.kp, self.delta, type='transverse')
+        self.qpd_t = self.metric.contract(self.qp, self.delta, type='transverse')
 
-        s = kk + self.contract(p,p) + 2*self.contract(k,p)
+        self.s = self.kk + self.metric.contract(self.p,self.p) + 2*self.metric.contract(self.k,self.p)
 
-        self.GAMMA = math.pow(constants.alpha, 3)/(16*self.xbj[i]*math.pow(constants.pi, 2)*math.pow((s - math.pow(self.proton_mass, 2)), 2)*math.sqrt(1 + math.pow(gamma, 2)))
+        self.GAMMA = math.pow(constants.alpha, 3)/(16*self.xbj[i]*math.pow(constants.pi, 2)*math.pow((self.s - math.pow(self.proton_mass, 2)), 2)*math.sqrt(1 + math.pow(self.gamma, 2)))
 
-        D_plus = (1/(2*kp_qp)) - (1/(2*k_qp))
-        D_minus = -(1/(2*kp_qp)) - (1/(2*k_qp))
+        self.D_plus = (1/(2*self.kp_qp)) - (1/(2*self.k_qp))
+        self.D_minus = -(1/(2*self.kp_qp)) - (1/(2*self.k_qp))
 
-        A_UU = -4*math.cos(phi)*(D_plus*((kqp_t - 2*kk_t - 2*k_qp)*kp_P + (2*kp_qp - 2*kkp_t - kpqp_t)*kP + kp_qp*kP_t + k_qp*kpP_t - 2*k_kp*kP_t) - D_minus*((2*k_kp - kpqp_t - kkp_t)*P_qp +2*k_kp*qpP_t - kp_qp*kP_t - k_qp*kpP_t))
-        B_UU = -2*xi*math.cos(phi)*(D_plus*((kqp_t - 2*kk_t - 2*k_qp)*kp_d + (2*kp_qp - 2*kkp_t - kpqp_t)*kd + kp_qp*kd_t + k_qp*kpd_t - 2*k_kp*kd_t) - D_minus*((2*k_kp - kpqp_t - kkp_t)*qpd + 2*k_kp*qpd_t - kp_qp*kd_t - k_qp*kpd_t))
-        C_UU = -2*math.cos(phi)*(D_plus*(2*k_kp*kd_t - kp_qp*kd_t - k_qp*kpd_t +4*xi*k_kp*kP_t - 2*xi*kp_qp*kP_t - 2*xi*k_qp*kpP_t) - D_minus*(k_kp*qpd_t - kp_qp*kd_t - k_qp*kpd_t + 2*xi*k_kp*qpP_t - 2*xi*kp_qp*kpP_t - 2*xi*k_qp*kpP_t))
+    def calculate_interference(self, i, phi: 'float'):
+        self.calculate_kinematics(i, phi)
+        A_UU = -4*math.cos(phi)*(self.D_plus*((self.kqp_t - 2*self.kk_t - 2*self.k_qp)*self.kp_P
+                                              + (2*self.kp_qp - 2*self.kkp_t - self.kpqp_t)*self.kP + self.kp_qp*self.kP_t
+                                              + self.k_qp*self.kpP_t - 2*self.k_kp*self.kP_t)
+                                 -self.D_minus*((2*self.k_kp - self.kpqp_t - self.kkp_t)*self.P_qp + 2*self.k_kp*self.qpP_t
+                                                - self.kp_qp*self.kP_t - self.k_qp*self.kpP_t))
+
+
+        B_UU = -2*self.xi*math.cos(phi)*(self.D_plus*((self.kqp_t - 2*self.kk_t - 2*self.k_qp)*self.kp_d + (2*self.kp_qp - 2*self.kkp_t - self.kpqp_t)*self.kd
+                                                      + self.kp_qp*self.kd_t + self.k_qp*self.kpd_t - 2*self.k_kp*self.kd_t)
+                                         - self.D_minus*((2*self.k_kp - self.kpqp_t - self.kkp_t)*self.qpd + 2*self.k_kp*self.qpd_t
+                                                         - self.kp_qp*self.kd_t - self.k_qp*self.kpd_t))
+        C_UU = -2*math.cos(phi)*(self.D_plus*(2*self.k_kp*self.kd_t - self.kp_qp*self.kd_t - self.k_qp*self.kpd_t
+                                              + 4*self.xi*self.k_kp*self.kP_t - 2*self.xi*self.kp_qp*self.kP_t - 2*self.xi*self.k_qp*self.kpP_t)
+                                 - self.D_minus*(self.k_kp*self.qpd_t - self.kp_qp*self.kd_t - self.k_qp*self.kpd_t + 2*self.xi*self.k_kp*self.qpP_t
+                                                 - 2*self.xi*self.kp_qp*self.kpP_t - 2*self.xi*self.k_qp*self.kpP_t))
 
         return A_UU, B_UU, C_UU
 
-    def calculate_cross_section(self, phi: 'np.array')->'iterator':
+    def calculate_bethe_heitler(self, i, phi):
+        self.calculate_kinematics(i, phi)
+        const = 8*math.pow(self.proton_mass, 2)/(self.t[i]*self.k_qp*self.kp_qp)
+        A_UU = -const*(4*self.tau*(math.pow(self.kP, 2) + math.pow(self.kp_P, 2)) - (self.tau + 1)*(math.pow(self.kd, 2) + math.pow(self.kp_d, 2)))
+        B_UU = -2*const*(math.pow(self.kd, 2) + math.pow(self.kp_d, 2))
+
+        return A_UU, B_UU
+
+    def calculate_dvcs(self, i, phi):
+        self.calculate_kinematics(i, phi)
+        F_UUT =  4/(self.Q2[i]*(1 - self.eps))
+        F_UUL = (4*self.eps)/(self.Q2[i]*(1 - self.eps))
+
+        return F_UUT, F_UUL
+
+    def generate_cross_section(self, phi: 'np.array', type='full')->'iterator':
         """
            Generator for the DVCS cross section as a function of phi
         """
 
+        if type not in self.cross_section:
+            print('Invalid cross-section choice.')
+            yield 0
+
         self.update_elastic_form_factors(-self.t[0])
-        for p in phi:
+
+        for p in tqdm(phi):
+            # DVCS Term
             conversion = math.pow(.197326, 2)*1e7*(2*math.pi)
-            A, B, C = self.calculate_kinematics(0, p)
-            A_term = A*conversion*(self.GAMMA/(-self.t[0]*self.Q2[0]))*(self.F1*self.ReH[0] + self.tau*self.F2*self.ReE[0])
-            B_term = B*conversion*(self.GAMMA/(-self.t[0]*self.Q2[0]))*(self.F1 + self.F2)*(self.ReH[0] + self.ReE[0])
-            C_term = C*conversion*(self.GAMMA/(-self.t[0]*self.Q2[0]))*(self.F1 + self.F2)*self.ReHt[0]
+            FUUT, FUUL = self.calculate_dvcs(0, p)
 
-#            print('A: {0}\nB: {1}\nC: {2}\n'.format(A_term, B_term, C_term))
+            F_UUT = FUUT*conversion*(self.GAMMA/(self.Q2[0]*(1 - self.eps)))
+            F_UUL = FUUL*conversion*(self.GAMMA/(self.Q2[0]*(1 - self.eps)))*self.eps
 
-            self.cross_section = (A_term + B_term + C_term)
-            yield self.cross_section
+            self.cross_section['dvcs'] = (F_UUT + F_UUL)
 
-    def contract(self, a: 'np.array', b: 'numpy array', **kawgs)->'float':
+            # BH Term
+            ABH, BBH = self.calculate_bethe_heitler(0, p)
+            A_BH = ABH*conversion*self.GAMMA*(math.pow(self.F1, 2) + self.tau*math.pow(self.F2, 2))
+            B_BH = BBH*conversion*self.GAMMA*self.tau*math.pow(self.Gm, 2)
 
-        if 'type' in kawgs:
-            if kawgs['type'] is 'transverse':
-                return(a[1]*b[1] + a[2]*b[2])
-            else:
-                pass
-        else:
-         return(np.dot(a, np.dot(self.metric, b)))
+            self.cross_section['bh'] = (A_BH + B_BH)
+
+            # Interference Term
+            A, B, C = self.calculate_interference(0, p)
+            A_term = -A*conversion*(self.GAMMA/(-self.t[0]*self.Q2[0]))*(self.F1*self.ReH[0] + self.tau*self.F2*self.ReE[0])
+            B_term = -B*conversion*(self.GAMMA/(-self.t[0]*self.Q2[0]))*(self.F1 + self.F2)*(self.ReH[0] + self.ReE[0])
+            C_term = -C*conversion*(self.GAMMA/(-self.t[0]*self.Q2[0]))*(self.F1 + self.F2)*self.ReHt[0]
+
+            self.cross_section['int'] = (A_term + B_term + C_term)
+
+            self.cross_section['full'] = self.cross_section['bh'] + self.cross_section['dvcs'] + self.cross_section['int']
+
+            yield self.cross_section[type]
 
     def read_data_file(self, file: str):
         self.data_file = file
@@ -207,13 +310,18 @@ if __name__ == "__main__":
     femto.read_data_file('data\cff.csv')
     
     phi = math.radians(360)*np.array([np.random.random() for i in range(1000)])
-    cs = -np.fromiter(femto.calculate_cross_section(phi), dtype=float, count = phi.size)
+#    phi = np.array([math.radians(i) for i in range(1)])
+    cs_bh = np.fromiter(femto.generate_cross_section(phi, type='bh'), dtype=float, count=phi.size)
+    cs_dvcs = np.fromiter(femto.generate_cross_section(phi, type='dvcs'), dtype=float, count = phi.size)
+    cs_int = np.fromiter(femto.generate_cross_section(phi, type='int'), dtype=float, count=phi.size)
 
-    plt.scatter(phi, cs, marker='.')
+    plt.scatter(phi, cs_bh, marker='.', color='xkcd:periwinkle')
+    plt.scatter(phi, cs_dvcs, marker='.', color='xkcd:light red')
+    plt.scatter(phi, cs_int, marker='.', color='xkcd:seafoam')
     plt.grid(True)
     plt.xlabel(r'$\phi$(radians)')
     plt.ylabel(r'$\frac{{d^{5}\sigma^{I}_{unpolar}}}{dx_{bj} dQ^{2} dt d\phi d\phi_{s}}$', fontsize='x-large')
-    plt.ylim(-0.01, 0.025)
+    plt.ylim(-0.05, 0.19)
     plt.xlim(0, 6.29)
 
     plt.show()

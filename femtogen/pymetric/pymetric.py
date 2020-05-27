@@ -7,7 +7,7 @@ class Metric:
 
     def set_minkowski_metric(self) -> 'numpy array':
         """
-        Returns the 4x4 minkowski metric with diagonal of {1, -1, -1, -1}
+        Returns the 4x4 minkowski pymetric with diagonal of {1, -1, -1, -1}
         """
         self.metric = np.multiply(np.identity(4), np.array([1, -1, -1, -1]))
 

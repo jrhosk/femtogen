@@ -1,5 +1,5 @@
 __version__ = '1.0.0'
 
-from .pymetric import *
+from . import pymetric
 
 __all__ = ("pymetric")

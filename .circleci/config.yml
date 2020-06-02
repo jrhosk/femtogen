@@ -22,7 +22,7 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            pytest -v --cov=femtogen/test_femtogen.py
+            python -m unittest femtogen/test_femtogen.py
 
 workflows:
   main:

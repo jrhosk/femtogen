@@ -1,0 +1,13 @@
+flake8==3.8.2
+matplotlib==3.2.1
+numpy==1.18.4
+pandas==1.0.3
+py==1.8.1
+pyflakes==2.2.0
+pytest==5.4.2
+pytest-cov==2.9.0
+pytools==2020.1
+scipy==1.4.1
+tqdm==4.46.0
+urllib3==1.25.9
+zipp==3.1.0

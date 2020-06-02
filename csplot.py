@@ -7,12 +7,14 @@ from femtogen import FemtoGen
 if __name__ == "__main__":
     
     femto = FemtoGen()
-    femto.read_data_file('data\cff.csv')
-    
+    kinematics = femto.read_data_file('data\cff.csv')
+    femto.set_kinematics(array=kinematics[0])
+
     phi = math.radians(360)*np.array([np.random.random() for i in range(1000)])
     cs = np.fromiter(femto.generate_cross_section(phi,
                                                   type='full',
                                                   error=femto.error_generator(stdev=0.005)), dtype=float, count=phi.size)
+
     plt.scatter(phi, cs, marker='.', color='xkcd:barney purple')
     plt.grid(True)
     plt.xlabel(r'$\phi$(radians)')

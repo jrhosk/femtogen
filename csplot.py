@@ -12,8 +12,8 @@ if __name__ == "__main__":
 
     phi = math.radians(360)*np.array([np.random.random() for i in range(1000)])
     cs = np.fromiter(femto.generate_cross_section(phi,
-                                                  type='full',
-                                                  error=femto.error_generator(stdev=0.005)), dtype=float, count=phi.size)
+                                                  error=femto.error_generator(stdev=0.005),
+                                                  type='full'), dtype=float, count=phi.size)
 
     plt.scatter(phi, cs, marker='.', color='xkcd:barney purple')
     plt.grid(True)

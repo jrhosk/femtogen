@@ -2,6 +2,10 @@ import numpy as np
 
 class Metric:
 
+    '''
+    Metric class provides structure and functions for common operations between four-vectors in relativistic physics.
+    '''
+
     def __init__(self):
         self.metric = None
 
@@ -16,13 +20,20 @@ class Metric:
     def contract(self, a: 'np.array', b: 'numpy array', **kawgs) -> 'float':
         '''
 
+        Computes the dot product of two four-momentum vectors after applying metric tensor.
+
+            S = U^T M V
+
+        Where S is the scalar value of the contraction, U and V are four-momentum vectors, and M defines the metric.
+
         :param a: array one
         :param b: array two
         :param kawgs: qualifies type of contraction. Default contraction is four-vector. Optional contraction of
-        three vector in the case of transverse.
+                      three vector in the case of transverse.
 
         :return: scalar value of contraction.
         '''
+
         try:
             assert a.size == b.size
 

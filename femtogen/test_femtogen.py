@@ -19,6 +19,10 @@ class MyTestCase(unittest.TestCase):
         print('Testing Femtogen.read_data_file() ....')
         self.assertRaises(AssertionError, self.femto.read_data_file,'random_file_that_doesnt_exist.csv')
 
+    def test_divide_by_zero(self):
+        # Check that invalid file
+        print('Testing Femtogen.update_form_factors() ....')
+        self.assertRaises(ZeroDivisionError, self.femto.update_elastic_form_factors, -0.710649)
 
 if __name__ == '__main__':
     unittest.main()

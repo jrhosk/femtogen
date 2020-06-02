@@ -116,10 +116,15 @@ class FemtoGen:
         :return: The Fermi, Dirc, Electric, Magnetic form factors
         '''
 
-        self.Ge = 1 / math.pow(1 + t / 0.710649, 2)
-        self.Gm = 2.792847337 * self.Ge
-        self.F2 = (self.Gm - self.Ge) / (1 + (t / (4 * math.pow(0.938, 2))))
-        self.F1 = self.Gm - self.F2
+        try:
+
+            self.Ge = 1 / math.pow(1 + t / 0.710649, 2)
+            self.Gm = 2.792847337 * self.Ge
+            self.F2 = (self.Gm - self.Ge) / (1 + (t / (4 * math.pow(0.938, 2))))
+            self.F1 = self.Gm - self.F2
+        except ZeroDivisionError:
+            print('Divide by zero error in: {}'.format(self.update_elastic_form_factors.__name__))
+            raise
 
         return self.F1, self.F2, self.Ge, self.Gm
 

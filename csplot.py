@@ -11,9 +11,20 @@ if __name__ == "__main__":
     femto.set_kinematics(array=kinematics[0])
 
     phi = math.radians(360)*np.array([np.random.random() for i in range(1000)])
+    dv = np.fromiter(femto.generate_cross_section(phi,
+                                                  error=femto.error_generator(stdev=0.0025),
+                                                  type='dvcs'), dtype=float, count=phi.size)
+    bh = np.fromiter(femto.generate_cross_section(phi,
+                                                  error=femto.error_generator(stdev=0.0025),
+                                                  type='bh'), dtype=float, count=phi.size)
+    it = np.fromiter(femto.generate_cross_section(phi,
+                                                  error=femto.error_generator(stdev=0.0025),
+                                                  type='int'), dtype=float, count=phi.size)
     cs = np.fromiter(femto.generate_cross_section(phi,
                                                   error=femto.error_generator(stdev=0.0025),
                                                   type='full'), dtype=float, count=phi.size)
+
+    femto.write_cross_section_csv(phi=phi, dvcs=dv, bh=bh, interference=it, total=cs)
 
     plt.scatter(phi, cs, marker='.', color='xkcd:barney purple')
     plt.grid(True)

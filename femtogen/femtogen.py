@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import pandas as pd
+import os
 import os.path
 
 from scipy import constants
@@ -412,6 +413,38 @@ class FemtoGen:
         self.kinematics = PyStruct(xbj, t, Q2, k_0, ReH, ReE, ImH, ImE, ReHt, ReEt, ImHt, ImEt)
 
         return self.kinematics
+
+    def write_cross_section_csv(self, phi=0, dvcs=0, bh=0, interference=0, total=0)->'DataFrame':
+        '''
+        Writes the generated total dvcs cross-section and angle data to a csv formatted file in the
+        ouput directory. If directory does not exist, try and create the directory relative to current
+        working directory. Once the pandas data frame is created, it is returned from the function.
+
+        :param phi: scattering angle relative to the x-y plane (radians).
+        :param dvcs: numpy array containing the generated dvcs cross-section versys phi
+        :param bh: numpy array containing the generated bethe-heitler cross-section versys phi
+        :param interference: numpy array containing the generated dvcs*bethe-heitler cross term versys phi
+        :param total: numpy array containing the generated total dvcs cross-section versys phi
+        :return: dataFrame containing cross section and phi angle information
+        '''
+
+        try:
+            assert os.path.isdir(os.path.join(os.getcwd(), 'output')) is True
+
+        except AssertionError:
+            print('Output directory does not exist, trying to create in base directory: {}'.format(os.getcwd()))
+            directory = os.path.join(os.getcwd(), 'output')
+            os.mkdir(directory, mode=0o777)
+
+        df = pd.DataFrame({'phi': phi,
+                           'dvcs': dvcs,
+                           'bh': bh,
+                           'interference': interference,
+                           'total': total})
+
+        df.to_csv('output/cross_section.csv')
+
+        return df
 
 
 @dataclass

@@ -24,7 +24,9 @@ if __name__ == "__main__":
                                                   error=femto.error_generator(stdev=0.0025),
                                                   type='full'), dtype=float, count=phi.size)
 
-    femto.write_cross_section_csv(phi=phi, dvcs=dv, bh=bh, interference=it, total=cs)
+#    femto.write_cross_section_csv(phi=phi, dvcs=dv, bh=bh, interference=it, total=cs)
+    df = femto.make_cross_section_date_frame(phi=phi, cs={'dvcs':dv, 'bh':bh, 'interference':it, 'total':cs})
+    print(df)
 
     plt.scatter(phi, cs, marker='.', color='xkcd:barney purple')
     plt.grid(True)

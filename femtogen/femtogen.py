@@ -414,17 +414,13 @@ class FemtoGen:
 
         return self.kinematics
 
-    def write_cross_section_csv(self, phi=0, dvcs=0, bh=0, interference=0, total=0)->'DataFrame':
+    def write_cross_section_csv(self, data_frame:'DataFrame')->'DataFrame':
         '''
         Writes the generated total dvcs cross-section and angle data to a csv formatted file in the
         ouput directory. If directory does not exist, try and create the directory relative to current
         working directory. Once the pandas data frame is created, it is returned from the function.
 
-        :param phi: scattering angle relative to the x-y plane (radians).
-        :param dvcs: numpy array containing the generated dvcs cross-section versys phi
-        :param bh: numpy array containing the generated bethe-heitler cross-section versys phi
-        :param interference: numpy array containing the generated dvcs*bethe-heitler cross term versys phi
-        :param total: numpy array containing the generated total dvcs cross-section versys phi
+        :param data_frame a PANDAS dataFrame to write to disk.
         :return: PANDAS dataFrame containing cross section and phi angle information
         '''
 
@@ -436,16 +432,31 @@ class FemtoGen:
             directory = os.path.join(os.getcwd(), 'output')
             os.mkdir(directory, mode=0o777)
 
-        df = pd.DataFrame({'phi': phi,
-                           'dvcs': dvcs,
-                           'bh': bh,
-                           'interference': interference,
-                           'total': total})
 
-        df.to_csv('output/cross_section.csv')
+        data_frame.to_csv('output/cross_section.csv')
+
+        return data_frame
+
+    def make_cross_section_date_frame(self, phi: 'numpy.array', cs: '{key:numpy.array}')->'DataFrame':
+        '''
+        Builds a pandas DataFrame containing phi and cross-section data. Cross-section data is read in as a
+        dictionary containing a key with the column description and a numpy array containing the cross-section
+        data.
+
+        || Warning || It is on the user to make sure the cross-section data correlates with the phi angle. No
+        checks are made to test this.
+
+        :param phi: scattering angle relative to the x-y plane (radians).
+        :param cs: a dictionary with keys describing the column names and numpy arrays
+                   containing the generated cross-section versys phi data
+        :return: PANDAS dataFrame containing cross section and phi angle information
+        '''
+        df = pd.DataFrame({'phi': phi})
+
+        for name, cross_section in cs.items():
+            df = pd.merge(df, pd.DataFrame({'phi':phi, name: cross_section}), how='outer', on='phi')
 
         return df
-
 
 @dataclass
 class PyStruct:

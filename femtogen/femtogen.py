@@ -425,7 +425,7 @@ class FemtoGen:
         :param bh: numpy array containing the generated bethe-heitler cross-section versys phi
         :param interference: numpy array containing the generated dvcs*bethe-heitler cross term versys phi
         :param total: numpy array containing the generated total dvcs cross-section versys phi
-        :return: dataFrame containing cross section and phi angle information
+        :return: PANDAS dataFrame containing cross section and phi angle information
         '''
 
         try:

@@ -437,7 +437,7 @@ class FemtoGen:
 
         return data_frame
 
-    def make_cross_section_date_frame(self, phi: 'numpy.array', cs: '{key:numpy.array}')->'DataFrame':
+    def make_cross_section_date_frame(self, cs: '{key:(numpy.array,numpy.array)}')->'DataFrame':
         '''
         Builds a pandas DataFrame containing phi and cross-section data. Cross-section data is read in as a
         dictionary containing a key with the column description and a numpy array containing the cross-section
@@ -451,10 +451,24 @@ class FemtoGen:
                    containing the generated cross-section versys phi data
         :return: PANDAS dataFrame containing cross section and phi angle information
         '''
-        df = pd.DataFrame({'phi': phi})
 
+        df = pd.DataFrame({})
         for name, cross_section in cs.items():
-            df = pd.merge(df, pd.DataFrame({'phi':phi, name: cross_section}), how='outer', on='phi')
+            cs_type = np.chararray(shape=(cross_section[0].size,), itemsize=len(name))
+            cs_type[:] = name
+
+            if len(df) == 0:
+                df = pd.DataFrame({'phi': cross_section[0],
+                                   'cross-section':cross_section[1],
+                                   'scattering-type':cs_type.decode()
+                                   })
+            else:
+                df = pd.concat([df,
+                                pd.DataFrame({'phi': cross_section[0],
+                                              'cross-section': cross_section[1],
+                                              'scattering-type': cs_type.decode()
+                                              })
+                                ])
 
         return df
 

@@ -7,21 +7,22 @@ from femtogen import FemtoGen
 if __name__ == "__main__":
     
     femto = FemtoGen()
-    kinematics = femto.read_data_file('data\cff.csv')
-    femto.set_kinematics(array=kinematics[0])
+    femto.load_generator(generator='UU')
+    kinematics = femto.generator.read_data_file('data\cff.csv')
+    femto.generator.set_kinematics(array=kinematics[0])
 
     phi = math.radians(360)*np.array([np.random.random() for i in range(1000)])
-    dv = np.fromiter(femto.generate_cross_section(phi,
-                                                  error=femto.error_generator(stdev=0.0025),
-                                                  type='dvcs'), dtype=float, count=phi.size)
-    bh = np.fromiter(femto.generate_cross_section(phi,
-                                                  error=femto.error_generator(stdev=0.0025),
+    dv = np.fromiter(femto.generator.generate_cross_section(phi,
+                                                            error=femto.generator.error_generator(stdev=0.0025),
+                                                            type='dvcs'), dtype=float, count=phi.size)
+    bh = np.fromiter(femto.generator.generate_cross_section(phi,
+                                                  error=femto.generator.error_generator(stdev=0.0025),
                                                   type='bh'), dtype=float, count=phi.size)
-    it = np.fromiter(femto.generate_cross_section(phi,
-                                                  error=femto.error_generator(stdev=0.0025),
+    it = np.fromiter(femto.generator.generate_cross_section(phi,
+                                                  error=femto.generator.error_generator(stdev=0.0025),
                                                   type='int'), dtype=float, count=phi.size)
-    cs = np.fromiter(femto.generate_cross_section(phi,
-                                                  error=femto.error_generator(stdev=0.0025),
+    cs = np.fromiter(femto.generator.generate_cross_section(phi,
+                                                  error=femto.generator.error_generator(stdev=0.0025),
                                                   type='full'), dtype=float, count=phi.size)
 
     df = femto.make_cross_section_date_frame(cs={'dvcs':(phi, dv), 'bh':(phi, bh), 'interference':(phi, it), 'total':(phi, cs)})

@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 
 from tqdm import tqdm
+import femtogen.log.pylogger as log
 
 
 class FemtoGen:
@@ -52,6 +53,7 @@ class FemtoGen:
         """
         self._generator = getattr(self._module, name)()
 
+    @log.logger
     def load_generator(self, generator='UU'):
         """
         Load scattering module from physics library.
@@ -78,6 +80,7 @@ class FemtoGen:
         self._module_list[generator] = (package, module)
         print('New generator module added to list: ... {0}.{1}'.format(package, module))
 
+    @log.logger
     @staticmethod
     def write_cross_section_csv(data_frame: 'DataFrame') -> 'DataFrame':
         """
@@ -101,6 +104,7 @@ class FemtoGen:
 
         return data_frame
 
+    @log.logger
     @staticmethod
     def make_cross_section_date_frame(cs: '{key:(numpy.array,numpy.array)}') -> 'DataFrame':
         """

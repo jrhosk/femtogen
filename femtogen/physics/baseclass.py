@@ -1,9 +1,12 @@
-import importlib
+import logging
+import functools
 
 from dataclasses import dataclass
-from dataclasses import astuple
 from abc import ABC
 from  abc import abstractmethod
+
+from femtogen.log import create_logger
+
 
 class FemtoGenAbstractClass(ABC):
     """
@@ -19,6 +22,16 @@ class FemtoGenAbstractClass(ABC):
 
     def __init__(self):
         super().__init__()
+
+    @abstractmethod
+    def update_elastic_form_factors(self, t: float) -> 'float, float, float, float':
+        """
+
+        Calculated the elastic and magnetic form factors F1, F2, Ge, Gm
+
+        :param t: four momentum transfer of proton
+        :return: The Fermi, Dirc, Electric, Magnetic form factors
+        """
 
 
     @abstractmethod

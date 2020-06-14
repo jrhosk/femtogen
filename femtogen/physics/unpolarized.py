@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import os
 import os.path
+import femtogen.log.pylogger as log
 
 from scipy import constants
 from dataclasses import dataclass
@@ -109,6 +110,7 @@ class Generator(FemtoGenAbstractClass):
                               'int': 0,
                               'full': 0}
 
+    @log.logger
     def update_elastic_form_factors(self, t: float) -> 'float, float, float, float':
         """
 
@@ -124,12 +126,13 @@ class Generator(FemtoGenAbstractClass):
             self.Gm = 2.792847337 * self.Ge
             self.F2 = (self.Gm - self.Ge) / (1 + (t / (4 * math.pow(0.938, 2))))
             self.F1 = self.Gm - self.F2
-        except ZeroDivisionError:
-            print('Divide by zero error in: {}'.format(self.update_elastic_form_factors.__name__))
+        except ZeroDivisionError as error:
+            print('{error} in: {info}'.format(error=error, info=self.update_elastic_form_factors.__name__))
             raise
 
         return self.F1, self.F2, self.Ge, self.Gm
 
+    @log.logger
     def calculate_kinematics(self, phi: float) -> 'None':
         """
 
@@ -211,6 +214,7 @@ class Generator(FemtoGenAbstractClass):
         self.D_plus = (1 / (2 * self.kp_qp)) - (1 / (2 * self.k_qp))
         self.D_minus = -(1 / (2 * self.kp_qp)) - (1 / (2 * self.k_qp))
 
+    @log.logger
     def _calculate_interference(self, phi: float) -> 'float, float, float':
         """
 
@@ -245,6 +249,7 @@ class Generator(FemtoGenAbstractClass):
 
         return A_UU, B_UU, C_UU
 
+    @log.logger
     def _calculate_bethe_heitler(self, phi: float) -> 'float, float, float':
         """
 
@@ -261,6 +266,7 @@ class Generator(FemtoGenAbstractClass):
 
         return A_UU, B_UU, 0
 
+    @log.logger
     def _calculate_dvcs(self, phi: float) -> 'float, float, float':
         """
         Calculation of coefficients for DVCS term in the DVCS scattering cross section.
@@ -286,6 +292,7 @@ class Generator(FemtoGenAbstractClass):
 
         return F_UUT, 0, 0
 
+    @log.logger
     def generate_cross_section(self, phi: 'np.array', error=None, type='full') -> 'iterator':
         """
 
@@ -336,6 +343,7 @@ class Generator(FemtoGenAbstractClass):
 
             yield self.cross_section[type] + next(error)
 
+    @log.logger
     def error_generator(self, mean=0.0, stdev=1.0, systematic=0.0) -> 'iterator':
         """
 
@@ -350,6 +358,7 @@ class Generator(FemtoGenAbstractClass):
         while True:
             yield np.random.normal(mean, stdev) + systematic
 
+    @log.logger
     def read_data_file(self, file: str) -> 'list':
         """
 
@@ -384,6 +393,7 @@ class Generator(FemtoGenAbstractClass):
 
         return kinematic_variable_list
 
+    @log.logger
     def set_kinematics(self, xbj=0., t=0., Q2=0., k_0=0., ReH=0., ReE=0., ImH=0., ImE=0., ReHt=0., ReEt=0., ImHt=0.,
                        ImEt=0., **kwargs) -> 'pystruct':
         """

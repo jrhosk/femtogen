@@ -40,8 +40,8 @@ def logger(function):
 
             return result
 
-        except Exception as error:
-            _logger.error("There was an exception: {}".format(error))
+        except:
+            error = "There was an exception."
             error += function.__name__
             _logger.exception(error)
 

@@ -110,7 +110,7 @@ class Generator(FemtoGenAbstractClass):
                               'int': 0,
                               'full': 0}
 
-    @log.logger
+
     def update_elastic_form_factors(self, t: float) -> 'float, float, float, float':
         """
 
@@ -292,7 +292,7 @@ class Generator(FemtoGenAbstractClass):
 
         return F_UUT, 0, 0
 
-    @log.logger
+
     def generate_cross_section(self, phi: 'np.array', error=None, type='full') -> 'iterator':
         """
 
@@ -358,7 +358,7 @@ class Generator(FemtoGenAbstractClass):
         while True:
             yield np.random.normal(mean, stdev) + systematic
 
-    @log.logger
+
     def read_data_file(self, file: str) -> 'list':
         """
 

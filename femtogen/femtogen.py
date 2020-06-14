@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 from tqdm import tqdm
-import femtogen.log.pylogger as log
+from femtogen.log import pylogger as log
 
 
 class FemtoGen:
@@ -69,6 +69,7 @@ class FemtoGen:
         except ImportError as err:
             print('Error: {func}: {error}'.format(func=__name__, error=err))
 
+    @log.logger
     def register_generator(self, generator=None, module=None, package='femtogen.physics'):
         """
         Register scattering generator in FemtoGen module list.
@@ -80,7 +81,7 @@ class FemtoGen:
         self._module_list[generator] = (package, module)
         print('New generator module added to list: ... {0}.{1}'.format(package, module))
 
-    @log.logger
+
     @staticmethod
     def write_cross_section_csv(data_frame: 'DataFrame') -> 'DataFrame':
         """

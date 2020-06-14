@@ -110,7 +110,6 @@ class Generator(FemtoGenAbstractClass):
                               'int': 0,
                               'full': 0}
 
-
     def update_elastic_form_factors(self, t: float) -> 'float, float, float, float':
         """
 
@@ -132,7 +131,7 @@ class Generator(FemtoGenAbstractClass):
 
         return self.F1, self.F2, self.Ge, self.Gm
 
-    @log.logger
+
     def calculate_kinematics(self, phi: float) -> 'None':
         """
 
@@ -214,7 +213,7 @@ class Generator(FemtoGenAbstractClass):
         self.D_plus = (1 / (2 * self.kp_qp)) - (1 / (2 * self.k_qp))
         self.D_minus = -(1 / (2 * self.kp_qp)) - (1 / (2 * self.k_qp))
 
-    @log.logger
+
     def _calculate_interference(self, phi: float) -> 'float, float, float':
         """
 
@@ -249,7 +248,7 @@ class Generator(FemtoGenAbstractClass):
 
         return A_UU, B_UU, C_UU
 
-    @log.logger
+
     def _calculate_bethe_heitler(self, phi: float) -> 'float, float, float':
         """
 
@@ -266,7 +265,7 @@ class Generator(FemtoGenAbstractClass):
 
         return A_UU, B_UU, 0
 
-    @log.logger
+
     def _calculate_dvcs(self, phi: float) -> 'float, float, float':
         """
         Calculation of coefficients for DVCS term in the DVCS scattering cross section.
@@ -343,7 +342,7 @@ class Generator(FemtoGenAbstractClass):
 
             yield self.cross_section[type] + next(error)
 
-    @log.logger
+
     def error_generator(self, mean=0.0, stdev=1.0, systematic=0.0) -> 'iterator':
         """
 
@@ -393,7 +392,7 @@ class Generator(FemtoGenAbstractClass):
 
         return kinematic_variable_list
 
-    @log.logger
+
     def set_kinematics(self, xbj=0., t=0., Q2=0., k_0=0., ReH=0., ReE=0., ImH=0., ImE=0., ReHt=0., ReEt=0., ImHt=0.,
                        ImEt=0., **kwargs) -> 'pystruct':
         """

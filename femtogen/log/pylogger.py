@@ -1,7 +1,6 @@
 import logging
 import functools
 
-
 def create_logger():
     """
     Creates a logging object and returns it
@@ -9,7 +8,7 @@ def create_logger():
     _logger = logging.getLogger(__name__)
 
     c_handler = logging.StreamHandler()
-    c_handler.setLevel(logging.WARNING)
+    c_handler.setLevel(logging.DEBUG)
 
     f_handler = logging.FileHandler('error.log')
     f_handler.setLevel(logging.ERROR)
@@ -34,7 +33,7 @@ def logger(function):
     def wrapper(*args, **kwargs):
         _logger = create_logger()
         try:
-            _logger.warning("{0} - {1} - {2}".format(function.__name__, args, kwargs))
+            _logger.debug("{0} - {1} - {2}".format(function.__name__, args, kwargs))
             result = function(*args, **kwargs)
             _logger.debug(result)
 

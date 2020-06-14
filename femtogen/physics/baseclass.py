@@ -1,11 +1,6 @@
-import logging
-import functools
-
 from dataclasses import dataclass
 from abc import ABC
-from  abc import abstractmethod
-
-from femtogen.log import create_logger
+from abc import abstractmethod
 
 
 class FemtoGenAbstractClass(ABC):
@@ -33,7 +28,6 @@ class FemtoGenAbstractClass(ABC):
         :return: The Fermi, Dirc, Electric, Magnetic form factors
         """
 
-
     @abstractmethod
     def calculate_kinematics(self, phi: float) -> 'None':
         """
@@ -44,7 +38,6 @@ class FemtoGenAbstractClass(ABC):
         """
         pass
 
-
     @abstractmethod
     def _calculate_interference(self, phi: float) -> 'float, float, float':
         """
@@ -54,7 +47,6 @@ class FemtoGenAbstractClass(ABC):
         :return: coefficients for the DVCS-BN interference term.
         """
         pass
-
 
     @abstractmethod
     def _calculate_bethe_heitler(self, phi: float) -> 'float, float, float':
@@ -102,9 +94,9 @@ class FemtoGenAbstractClass(ABC):
         """
         pass
 
-
     @abstractmethod
-    def set_kinematics(self, xbj=0., t=0., Q2=0., k_0=0., ReH=0., ReE=0., ImH=0., ImE=0., ReHt=0., ReEt=0., ImHt=0., ImEt=0., **kwargs) -> 'pystruct':
+    def set_kinematics(self, xbj=0., t=0., Q2=0., k_0=0., ReH=0., ReE=0., ImH=0., ImE=0., ReHt=0., ReEt=0., ImHt=0.,
+                       ImEt=0., **kwargs) -> 'pystruct':
         """
 
         Worker function to build a pystruct dataclass for a list of kinematic variables.
@@ -126,6 +118,7 @@ class FemtoGenAbstractClass(ABC):
         :return: pystruct structure containing kinematic variables
         """
         pass
+
 
 @dataclass
 class PyStruct:

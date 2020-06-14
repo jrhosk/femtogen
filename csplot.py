@@ -12,7 +12,6 @@ if __name__ == "__main__":
     femto.generator.set_kinematics(array=kinematics[0])
 
     phi = math.radians(360)*np.array([np.random.random() for i in range(1000)])
-    femto.generator.update_elastic_form_factors(t=-0.710649)
 
     dv = np.fromiter(femto.generator.generate_cross_section(phi,
                                                             error=femto.generator.error_generator(stdev=0.0025),

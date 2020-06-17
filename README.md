@@ -7,7 +7,17 @@ This package is based on a formulation of the DVCS scattering cross section by *
 - *Extraction of Generalized Parton Distribution Observables from Deeply Virtual Electron Proton
    Scattering Experiments, Phys.Rev.D 101 (2020) 5, 054021 1903.05742 [hep-ph]*
    
- ## Documentation
- For in-depth documentation, usage, and examples see the documentation page: 
+ ## Information
+ For in-depth documentation, usage, and examples or information about the Center fo Nuclear Femtography projects, see the pages below.
+ - **Documentation** https://femtogen.readthedocs.io/en/latest/
+ - **Website**  https://pages.shanti.virginia.edu/Femtography/symposium-on-imaging-and-visualization-in-science/
+ - **github** https://github.com/uva-femtography
+ 
+ This package provides:
+ - A native generator for unpolarized DVCS scattering.
+ - Built in systematic and statistical error generator.
+ - Customizable user created scattering libraries that can be imported to work with framework.
+ - Functionality to build output tsv/csv files and export to Pandas Data Frame.
+    
  
  

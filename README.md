@@ -1,6 +1,6 @@
-==============================================================================
+============================================================================
 ## Femtogen - A generator package for Deeply Virtual Compton Scattering (DVCS)
-==============================================================================
+============================================================================
 ## Overview [![CircleCI](https://circleci.com/gh/jrhosk/femtogen.svg?style=shield)](https://app.circleci.com/pipelines/github/jrhosk/femtogen)
 This package is based on a formulation of the DVCS scattering cross section by *Kriesten, Liuti, et al.*:
 - *Theory of Deeply Virtual Compton Scattering off Unpolarized Proton (2020), 2004.08890 [hep-ph]*

@@ -38,7 +38,7 @@ class Metric:
             assert a.size == b.size
 
             if 'type' in kawgs:
-                if kawgs['type'] is 'transverse':
+                if kawgs['type'] == 'transverse':
                     return (a[1] * b[1] + a[2] * b[2])
                 else:
                     pass

@@ -9,5 +9,4 @@ pytest-cov==2.9.0
 pytools==2020.1
 scipy==1.4.1
 tqdm==4.46.0
-urllib3==1.25.9
 zipp==3.1.0

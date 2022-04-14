@@ -93,13 +93,20 @@ class Generator(FemtoGenAbstractClass):
         self.kd_t = 0
         self.kpd_t = 0
         self.qpd_t = 0
-
+        self.kpkp_t = 0
+        
         self.s = 0
 
         self.GAMMA = 0
 
         self.D_plus = 0
         self.D_minus = 0
+        
+        self.P_plus = 0
+        self.kp_plus = 0
+        self.k_plus = 0
+        self.qp_plus = 0
+        
 
         self.ke = 8.985551e9  # N m^2 C-2 Coulomb's constant
         self.metric = pymetric.Metric()
@@ -203,7 +210,8 @@ class Generator(FemtoGenAbstractClass):
         self.kd_t = self.metric.contract(self.k, self.delta, type='transverse')
         self.kpd_t = self.metric.contract(self.kp, self.delta, type='transverse')
         self.qpd_t = self.metric.contract(self.qp, self.delta, type='transverse')
-
+        self.kpkp_t = self.metric.contract(self.kp, self.kp, type='transverse')
+        
         self.s = self.kk + self.metric.contract(self.p, self.p) + 2 * self.metric.contract(self.k, self.p)
 
         self.GAMMA = math.pow(constants.alpha, 3) / (
@@ -211,8 +219,13 @@ class Generator(FemtoGenAbstractClass):
                                                                             2) * math.sqrt(1 + math.pow(self.gamma, 2)))
 
         self.D_plus = (1 / (2 * self.kp_qp)) - (1 / (2 * self.k_qp))
-        self.D_minus = -(1 / (2 * self.kp_qp)) - (1 / (2 * self.k_qp))
-
+        self.D_minus = (1 / (2 * self.kp_qp)) + (1 / (2 * self.k_qp))
+        
+        self.P_plus = (1 / math.sqrt( 2 ) ) * ( self.P[0] + self.P[3]  )
+        self.kp_plus = (1 / math.sqrt( 2 ) ) * ( self.kp[0] + self.kp[3]  )
+        self.k_plus = (1 / math.sqrt( 2 ) ) * ( self.k[0] + self.k[3]  )
+        self.qp_plus = (1 / math.sqrt( 2 ) ) * ( self.qp[0] + self.qp[3]  )
+        self.d_plus = (1 / math.sqrt( 2 ) ) * ( self.delta[0] + self.delta[3]  )
 
     def _calculate_interference(self, phi: float) -> 'float, float, float':
         """
@@ -224,27 +237,35 @@ class Generator(FemtoGenAbstractClass):
         """
 
         self.calculate_kinematics(phi)
-        A_UU = -4 * math.cos(phi) * (self.D_plus * ((self.kqp_t - 2 * self.kk_t - 2 * self.k_qp) * self.kp_P
-                                                    + (
-                                                        2 * self.kp_qp - 2 * self.kkp_t - self.kpqp_t) * self.kP + self.kp_qp * self.kP_t
-                                                    + self.k_qp * self.kpP_t - 2 * self.k_kp * self.kP_t)
-                                     - self.D_minus * ((
-                                                           2 * self.k_kp - self.kpqp_t - self.kkp_t) * self.P_qp + 2 * self.k_kp * self.qpP_t
-                                                       - self.kp_qp * self.kP_t - self.k_qp * self.kpP_t))
+        A_UU = - 8 * self.D_plus * ( 2 * self.kk_t * self.kp_P - self.kqp_t * self.kp_P + 2 * self.k_qp * self.kp_P \
+                            + 2 * self.kpkp_t * self.kP + self.kpqp_t * self.kP - 2 * self.kp_qp * self.kP \
+                            - 2 * self.k_kp * self.kP_t + self.kp_qp * self.kP_t - self.kpP_t * self.k_qp ) * math.cos(phi) \
+               - 8 * self.D_minus * ( 2 * self.kk_t * self.P_qp - 2 * self.k_kp * self.P_qp \
+                            + self.k_kp * self.qpP_t - self.kp_qp * self.kP_t - self.kpP_t * self.k_qp ) * math.cos(phi) \
+               + 8 * self.D_minus * ( - self.kp_P * self.kqp_t - self.kP * self.kpqp_t + self.k_kp * self.qpP_t ) * math.cos(phi)
 
-        B_UU = -2 * self.xi * math.cos(phi) * (self.D_plus * (
-            (self.kqp_t - 2 * self.kk_t - 2 * self.k_qp) * self.kp_d + (
-            2 * self.kp_qp - 2 * self.kkp_t - self.kpqp_t) * self.kd
-            + self.kp_qp * self.kd_t + self.k_qp * self.kpd_t - 2 * self.k_kp * self.kd_t)
-                                               - self.D_minus * ((
-                                                                     2 * self.k_kp - self.kpqp_t - self.kkp_t) * self.qpd + 2 * self.k_kp * self.qpd_t
-                                                                 - self.kp_qp * self.kd_t - self.k_qp * self.kpd_t))
-        C_UU = -2 * math.cos(phi) * (
-            self.D_plus * (2 * self.k_kp * self.kd_t - self.kp_qp * self.kd_t - self.k_qp * self.kpd_t
-                           + 4 * self.xi * self.k_kp * self.kP_t - 2 * self.xi * self.kp_qp * self.kP_t - 2 * self.xi * self.k_qp * self.kpP_t)
-            - self.D_minus * (
-                self.k_kp * self.qpd_t - self.kp_qp * self.kd_t - self.k_qp * self.kpd_t + 2 * self.xi * self.k_kp * self.qpP_t
-                - 2 * self.xi * self.kp_qp * self.kpP_t - 2 * self.xi * self.k_qp * self.kpP_t))
+        B_UU = - 4 * self.xi * self.D_plus * ( 2 * self.kk_t * self.kp_d - self.kqp_t * self.kp_d \
+                                + 2 * self.k_qp * self.kp_d + 2 * self.kk_t * self.kd \
+                                + self.kpqp_t * self.kd - 2 * self.kp_qp * self.kd \
+                                - 2 * self.k_kp * self.kd_t + self.kp_qp * self.kd_t - self.k_qp * self.kpd_t ) *math.cos(phi) \
+               - 4 * self.xi * self.D_minus * ( 2 * self.kk_t * self.qpd - 2 * self.k_kp * self.qpd\
+                                + self.k_kp * self.qpd_t - self.kp_qp * self.kd_t - self.kpd_t * self.k_qp ) * math.cos(phi)\
+               + 4 * self.xi * self.D_minus * ( - self.kp_d * self.kqp_t - self.kd * self.kpqp_t + self.k_kp * self.qpd_t ) * math.cos(phi)\
+               - 2 * ( self.kinematics.t / self.P_plus ) * self.D_plus * ( self.kp_plus * ( 2 * self.kk_t - self.kqp_t + 2 * self.k_qp )\
+                                + self.k_plus * ( 2 * self.kpkp_t + self.kpqp_t - 2 * self.kp_qp ) ) * math.cos(phi)\
+               - 2 * ( self.kinematics.t / self.P_plus ) * self.D_minus * ( self.qp_plus * ( 2 * self.kkp_t - 2 * self.k_kp ) ) * math.cos(phi)\
+               + 2 * ( self.kinematics.t / self.P_plus ) * self.D_minus * ( - self.kp_plus * self.kqp_t - self.k_plus * self.kpqp_t ) * math.cos(phi)
+        C_UU = - 4 * ( self.D_plus / self.P_plus ) * ( - self.kP_t * self.qpd_t * self.kp_plus + self.kd_t * self.qpP_t * self.kp_plus + self.kpP_t * self.qpd_t * self.k_plus\
+                                - self.kpd_t * self.qpP_t * self.k_plus + 2 * self.k_kp * self.kpP_t * self.d_plus + self.k_qp * self.kpP_t * self.d_plus\
+                                - self.kp_qp * self.kP_t * self.d_plus ) * math.cos(phi)\
+               - 4 * ( self.D_plus / self.P_plus ) * ( - 2 * self.k_kp * self.kpd_t * self.P_plus - self.k_qp * self.kpd_t * self.P_plus\
+                                + self.kp_qp * self.kd_t * self.P_plus ) * math.cos(phi)\
+               - 4 * ( self.D_minus / self.P_plus ) * ( - self.kp_qp * self.kP_t * self.d_plus + self.k_kp * self.qpP_t * self.d_plus - self.k_qp * self.kpP_t * self.d_plus ) * math.cos(phi)\
+               - 4 * ( self.D_minus / self.P_plus ) * ( self.kp_qp * self.kd_t * self.P_plus - self.k_kp * self.qpd_t * self.P_plus + self.k_qp * self.kpd_t * self.P_plus ) * math.cos(phi)\
+               - 4 * ( self.D_minus / self.P_plus ) * ( - 2 * self.qpP_t * self.kkp_t * self.d_plus + self.qpP_t * self.kd_t * self.kp_plus + self.qpP_t * self.kpd_t * self.k_plus\
+                                + 2 * self.kpqp_t * self.kP_t * self.d_plus - 2 * self.kpqp_t * self.kd_t * self.P_plus - self.qpd_t * self.kP_t * self.kp_plus\
+                                - self.qpd_t * self.kpP_t * self.k_plus + 2 * self.qpd_t * self.kkp_t * self.P_plus + self.k_kp * self.qpP_t * self.d_plus\
+                                                        - self.k_kp * self.qpd_t * self.P_plus ) * math.cos(phi)
 
         return A_UU, B_UU, C_UU
 
@@ -275,15 +296,15 @@ class Generator(FemtoGenAbstractClass):
         """
         self.calculate_kinematics(phi)
 
-        A = 4 * (1 - math.pow(self.xi, 2)) * (
+        A = 0.5 * 4 * (1 - math.pow(self.xi, 2)) * (
             math.pow(self.kinematics.ReH, 2) + math.pow(self.kinematics.ImH, 2) + math.pow(self.kinematics.ReHt,
                                                                                            2) + math.pow(
             self.kinematics.ImHt,
             2))
-        B = ((self.t_0 - self.kinematics.t) / 2 * math.pow(self.proton_mass, 2)) * (
+        B = 0.5 * ((self.t_0 - self.kinematics.t) / 4 * math.pow(self.proton_mass, 2)) * (
             math.pow(self.kinematics.ReE, 2) + math.pow(self.kinematics.ImE, 2) + math.pow(self.xi, 2) * (
             math.pow(self.kinematics.ReEt, 2) + math.pow(self.kinematics.ImEt, 2)))
-        C = ((2 * math.pow(self.xi, 2)) / (1 - math.pow(self.xi, 2))) * (
+        C = 0.5 * ((2 * math.pow(self.xi, 2))) * (
             self.kinematics.ReE * self.kinematics.ReH + self.kinematics.ImE * self.kinematics.ImH + self.kinematics.ReEt * self.kinematics.ReHt + self.kinematics.ImEt *
             self.kinematics.ImHt)
 
@@ -327,12 +348,12 @@ class Generator(FemtoGenAbstractClass):
 
             # Interference Term
             A, B, C = self._calculate_interference(p)
-            A_term = -A * conversion * (self.GAMMA / (-self.kinematics.t * self.kinematics.Q2)) * (
+            A_term = A * conversion * (self.GAMMA / (-self.kinematics.t * self.kinematics.Q2)) * (
                 self.F1 * self.kinematics.ReH + self.tau * self.F2 * self.kinematics.ReE)
-            B_term = -B * conversion * (self.GAMMA / (-self.kinematics.t * self.kinematics.Q2)) * (
+            B_term = B * conversion * (self.GAMMA / (-self.kinematics.t * self.kinematics.Q2)) * (
                 self.F1 + self.F2) * (
                          self.kinematics.ReH + self.kinematics.ReE)
-            C_term = -C * conversion * (self.GAMMA / (-self.kinematics.t * self.kinematics.Q2)) * (
+            C_term = C * conversion * (self.GAMMA / (-self.kinematics.t * self.kinematics.Q2)) * (
                 self.F1 + self.F2) * self.kinematics.ReHt
 
             self.cross_section['int'] = (A_term + B_term + C_term)

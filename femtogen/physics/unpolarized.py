@@ -240,9 +240,9 @@ class Generator(FemtoGenAbstractClass):
         A_UU = - 8 * self.D_plus * ( 2 * self.kk_t * self.kp_P - self.kqp_t * self.kp_P + 2 * self.k_qp * self.kp_P \
                             + 2 * self.kpkp_t * self.kP + self.kpqp_t * self.kP - 2 * self.kp_qp * self.kP \
                             - 2 * self.k_kp * self.kP_t + self.kp_qp * self.kP_t - self.kpP_t * self.k_qp ) * math.cos(phi) \
-               - 8 * self.D_minus * ( 2 * self.kk_t * self.P_qp - 2 * self.k_kp * self.P_qp \
+               - 8 * self.D_minus *( 2 * self.kk_t * self.P_qp - 2 * self.k_kp * self.P_qp \
                             + self.k_kp * self.qpP_t - self.kp_qp * self.kP_t - self.kpP_t * self.k_qp ) * math.cos(phi) \
-               + 8 * self.D_minus * ( - self.kp_P * self.kqp_t - self.kP * self.kpqp_t + self.k_kp * self.qpP_t ) * math.cos(phi)
+               + 8 * self.D_minus *( - self.kp_P * self.kqp_t - self.kP * self.kpqp_t + self.k_kp * self.qpP_t ) * math.cos(phi)
 
         B_UU = - 4 * self.xi * self.D_plus * ( 2 * self.kk_t * self.kp_d - self.kqp_t * self.kp_d \
                                 + 2 * self.k_qp * self.kp_d + 2 * self.kk_t * self.kd \
@@ -297,17 +297,15 @@ class Generator(FemtoGenAbstractClass):
         self.calculate_kinematics(phi)
 
         A = 0.5 * 4 * (1 - math.pow(self.xi, 2)) * (
-            math.pow(self.kinematics.ReH, 2) + math.pow(self.kinematics.ImH, 2) + math.pow(self.kinematics.ReHt,
-                                                                                           2) + math.pow(
-            self.kinematics.ImHt,
-            2))
+            math.pow(self.kinematics.ReH, 2) + math.pow(self.kinematics.ImH, 2) + math.pow(self.kinematics.ReHt,2)+\
+            math.pow(self.kinematics.ImHt,2))
         B = 0.5 * ((self.t_0 - self.kinematics.t) / 4 * math.pow(self.proton_mass, 2)) * (
             math.pow(self.kinematics.ReE, 2) + math.pow(self.kinematics.ImE, 2) + math.pow(self.xi, 2) * (
             math.pow(self.kinematics.ReEt, 2) + math.pow(self.kinematics.ImEt, 2)))
         C = 0.5 * ((2 * math.pow(self.xi, 2))) * (
-            self.kinematics.ReE * self.kinematics.ReH + self.kinematics.ImE * self.kinematics.ImH + self.kinematics.ReEt * self.kinematics.ReHt + self.kinematics.ImEt *
-            self.kinematics.ImHt)
-
+            self.kinematics.ReE * self.kinematics.ReH + self.kinematics.ImE * self.kinematics.ImH +\
+            self.kinematics.ReEt * self.kinematics.ReHt + self.kinematics.ImEt * self.kinematics.ImHt)
+        
         F_UUT = (A + B - C)
 
         return F_UUT, 0, 0
@@ -348,12 +346,12 @@ class Generator(FemtoGenAbstractClass):
 
             # Interference Term
             A, B, C = self._calculate_interference(p)
-            A_term = A * conversion * (self.GAMMA / (-self.kinematics.t * self.kinematics.Q2)) * (
+            A_term = -A * conversion * (self.GAMMA / (-self.kinematics.t * self.kinematics.Q2)) * (
                 self.F1 * self.kinematics.ReH + self.tau * self.F2 * self.kinematics.ReE)
-            B_term = B * conversion * (self.GAMMA / (-self.kinematics.t * self.kinematics.Q2)) * (
+            B_term = -B * conversion * (self.GAMMA / (-self.kinematics.t * self.kinematics.Q2)) * (
                 self.F1 + self.F2) * (
                          self.kinematics.ReH + self.kinematics.ReE)
-            C_term = C * conversion * (self.GAMMA / (-self.kinematics.t * self.kinematics.Q2)) * (
+            C_term = -C * conversion * (self.GAMMA / (-self.kinematics.t * self.kinematics.Q2)) * (
                 self.F1 + self.F2) * self.kinematics.ReHt
 
             self.cross_section['int'] = (A_term + B_term + C_term)

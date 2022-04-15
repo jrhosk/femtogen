@@ -39,7 +39,7 @@ class Metric:
 
             if 'type' in kawgs:
                 if kawgs['type'] == 'transverse':
-                    return (a[1] * b[1] + a[2] * b[2])
+                    return (-a[1] * b[1] - a[2] * b[2])
                 else:
                     pass
             else:

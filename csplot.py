@@ -10,7 +10,7 @@ if __name__ == "__main__":
     kinematics = femto.generator.read_data_file('data/cff.csv')
     femto.generator.set_kinematics(array=kinematics[0])
 
-    phi = math.radians(360) * np.array([np.random.random() for i in range(1000)])
+    phi = (math.radians(360)/360) * np.array([np.random.uniform(7.51, 352.4) for i in range(1000)])
 
     dv = np.fromiter(femto.generator.generate_cross_section(phi,
                                                             error=femto.generator.error_generator(stdev=0.0025),

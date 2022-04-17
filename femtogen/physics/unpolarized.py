@@ -307,6 +307,9 @@ class Generator(FemtoGenAbstractClass):
         if type not in self.cross_section:
             raise Exception('Invalid cross-section choice.\n\n{}'.format(self.generate_cross_section.__doc__))
 
+        if phi.min() < math.radians(7.5) or phi.max() > math.radians(352.5):
+            raise Exception('Values in phi should lie within the range [7.5, 352.5]')
+        
         self.update_elastic_form_factors(-self.kinematics.t)
 
         for p in tqdm(phi):
